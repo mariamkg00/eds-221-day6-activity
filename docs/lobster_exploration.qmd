@@ -1,0 +1,93 @@
+---
+title: "Day 6 Task"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+lobsters <- read_csv(here("data","Lobster_Abundance_All_Years_20210412.csv"), na = c("-99999", "")) %>% 
+  clean_names() %>% 
+  uncount(count)
+```
+
+### Find counts and mean sizes by site and year
+
+```{r}
+site_year_count_mean <- lobsters %>% 
+  group_by(site, year) %>% 
+  mutate(mean_size = mean(size_mm, na.rm= TRUE),
+            count = n())
+
+ggplot(data = site_year_count_mean , aes(x= year, y= count))+
+  geom_point(aes(color = site))
+  
+```
+
+### Find the proportion of legal lobsters at each site for 2020. 
+
+```{r}
+lobster_2020 <- lobsters %>% 
+  filter(year == 2020)
+
+count_lobsters_legal <- lobster_2020 %>% 
+  group_by(site) %>% 
+  mutate(legal = case_when(
+    size_mm < 79.76 ~ "no",
+    size_mm >= 79.76 ~ "yes"
+   ))
+
+count_lobsters_2020 <- count_lobsters_legal %>% 
+  group_by(site,legal) %>% 
+  summarize(count = n())
+
+ggplot(data = count_lobsters_2020, aes(x= site, y = count))+
+  geom_col(aes(fill = legal ), position = "fill")
+
+```
+
+```{r}
+#Task 3 
+
+ex_a <- lobsters %>% 
+  filter(site == c("IVEE","CARP","NAPL"))
+
+ex_b <- lobsters %>% 
+  filter(month == 8)
+
+ex_c <- lobsters %>% 
+  filter(site == "AQUE" | size_mm > 70)
+
+ex_d <- lobsters %>% 
+  filter(site != "NAPL")
+```
+
+```{r}
+#group_by and summarize practice
+mean_length_mm <- lobsters %>% 
+  group_by(site) %>% 
+  summarize(mean_size_mm = mean(size_mm , na.rm = TRUE))
+
+sd_length_mm <- lobsters %>% 
+  group_by(site) %>% 
+  summarize(sd_size_mm = sd(size_mm, na.rm = TRUE))
+
+max_length <- lobsters %>% 
+  group_by(site) %>% 
+  summarize(max_length_mm = max(size_mm, na.rm = TRUE))
+```
+
+```{r}
+#mutate practice 
+length_cm <- lobsters %>% 
+  mutate(size_cm = size_mm / 10)
+
+area %>% 
+  mutate(area = as.character("area"))
+
+```
